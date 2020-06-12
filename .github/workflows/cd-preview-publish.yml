@@ -1,0 +1,52 @@
+name: Publish Pre-Release
+
+on:
+  push:
+    branches:
+      - pre-release
+
+jobs:
+  publish-chrome:
+    name: Publish chrome (pre-release)
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: extension
+
+    strategy:
+      matrix:
+        node: [13.3]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use node ${{ matrix.node-version  }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version  }}
+
+      - name: Install npm dependencies
+        uses: bahmutov/npm-install@v1
+        with:
+          working-directory: extension
+
+      - name: Build chrome pre-release
+        run: make build target=chrome node_env=production
+
+      - name: Publish to chrome-webstore as preview
+        run: make publish-preview
+
+      - name: Parse version from package.json
+        id: parse_version
+        run: |
+          VERSION=$(make current-version)
+          echo "::set-output name=version::$VERSION"
+
+      - name: Create a release branch for future live release
+        uses: peterjgrainger/action-create-branch@2.0.1
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          branch: v${{ steps.parse_version.outputs.version }}

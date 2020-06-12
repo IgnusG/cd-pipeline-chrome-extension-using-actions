@@ -1,0 +1,17 @@
+name: Triggers
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: peter-evans/slash-command-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          reaction-token: ${{ secrets.GITHUB_TOKEN }}
+          commands: release,publish
+          issue-type: pull-request
