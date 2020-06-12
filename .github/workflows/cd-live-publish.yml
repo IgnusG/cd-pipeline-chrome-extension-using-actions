@@ -1,0 +1,83 @@
+name: Publish Live-Release
+
+on:
+  push:
+    branches:
+      - live-release
+
+jobs:
+  publish-chrome:
+    name: Publish chrome (live-release)
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: extension
+
+    strategy:
+      matrix:
+        node: [13.3]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use node ${{ matrix.node-version  }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version  }}
+
+      - name: Install npm dependencies
+        uses: bahmutov/npm-install@v1
+        with:
+          working-directory: extension
+
+      - name: Build chrome live-release
+        run: make build target=chrome node_env=production
+
+      - name: Publish to chrome-webstore as live
+        run: make publish-live
+
+      - name: Parse version from package.json
+        id: parse_version
+        run: |
+          VERSION=$(make current-version)
+          echo "::set-output name=version::$VERSION"
+
+      - name: Remove version branches prior to this release
+        uses: actions/github-script@v2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const parseVersion = (branchName) => branchName.slice(1).split('.').map((v) => parseInt(v));
+
+            const { data: branches } = await github.repos.listBranches({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+
+            const [major, minor, patch] = parseVersion('${{ steps.parse_version.outputs.version }}')
+
+            lowerBranches = branches.filter((branch) => {
+              if (!/v\d+\.\d+\.\d+/.test(branch.name)) return false;
+              const [branchMajor, branchMinor, branchPatch] = parseVersion(branch.name)
+
+              if (branchMajor > major) return false;
+              if (branchMajor < major) return true;
+
+              if (branchMinor > minor) return false;
+              if (branchMinor < minor) return true;
+
+              if (branchPatch > patch) return false;
+              if (branchPatch < patch) return true;
+
+              return true;
+            });
+
+            for (branch of lowerBranches) {
+              await github.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${branch.name}`
+              });
+            }
