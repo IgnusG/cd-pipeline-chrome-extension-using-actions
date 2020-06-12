@@ -1,0 +1,41 @@
+name: Notify about triggers
+
+on:
+  pull_request:
+    types: [opened]
+    branches:
+      - pre-release
+
+jobs:
+  notify:
+    name: Notify about triggers
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Notify about incorrect PR
+        uses: github-actions-up-and-running/pr-comment@v1.0.1
+        if: github.head_ref != 'master'
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            You're creating a PR against a pre-release branch from a branch different than master.
+
+            This is not allowed, I won't be able to bump versions automatically.
+
+      - name: Notify about triggers
+        uses: github-actions-up-and-running/pr-comment@v1.0.1
+        if: github.head_ref == 'master'
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            You're creating a PR against a pre-release branch.
+
+            Once you're happy with the changes, type one of
+              - `/release preview major`
+              - `/release preview minor`
+              - `/release preview patch`
+
+            I will **test your changes** and **bump the version** accordingly.
+            I will **merge the PR myself** once everything passes.

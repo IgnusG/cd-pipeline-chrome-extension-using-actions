@@ -1,0 +1,22 @@
+name: Merge version after bump
+
+on:
+  pull_request:
+    types: [labeled]
+    branches:
+      - pre-release
+
+jobs:
+  bump-version-merge:
+    name: Merge version after bump
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Merge release
+        uses: sudo-bot/action-pull-request-merge@v1.1.1
+        with:
+          github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          number: ${{ github.event.pull_request.number }}
+          filter-label: version-ready
+          merge-method: merge

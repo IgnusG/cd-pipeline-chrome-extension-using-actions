@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches-ignore:
+      - pre-release
+      - live-release
+
+jobs:
+  ci:
+    name: Continuous Integration
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: extension
+
+    strategy:
+      matrix:
+        node: [13.3]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use node ${{ matrix.node-version  }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version  }}
+
+      - name: Install npm dependencies
+        uses: bahmutov/npm-install@v1
+        with:
+          working-directory: extension
+
+    # Start of our Pipeline
+
+      - name: Lint Code
+        run: make ci-lint
+
+      - name: Test Code
+        run: make ci-test
+
+      - name: Test Pipeline
+        run: make ci-test-pipeline
+        continue-on-error: true
