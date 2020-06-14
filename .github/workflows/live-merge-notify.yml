@@ -36,8 +36,7 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            You're creating a PR against a live release branch.
-            The Version ${{ steps.parse_version.outputs.version }} is going to be published.
+            You're creating a PR against a live release branch. The Version **${{ steps.parse_version.outputs.version }}** is going to be published.
 
             Once you're happy with the release, type
               - `/publish release`
