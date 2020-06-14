@@ -23,5 +23,5 @@ jobs:
         uses: sudo-bot/action-pull-request-merge@v1.1.0
         with:
           github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          number: ${{ github.event.pull_request.number }}
+          number: ${{ github.event.client_payload.pull_request.number }}
           merge-method: rebase
