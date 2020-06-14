@@ -1,0 +1,9 @@
+{
+  "name": "cd-chrome-actions",
+  "version": "0.2.0",
+  "description": "Extension so good it should be a crime",
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {},
+  "dependencies": {}
+}
