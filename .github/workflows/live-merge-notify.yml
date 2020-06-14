@@ -1,0 +1,44 @@
+name: Notify about triggers
+
+on:
+  pull_request:
+    types: [opened]
+    branches:
+      - live-release
+
+jobs:
+  notify:
+    name: Notify about triggers
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: extension
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+
+      - name: Dump the client payload context
+        env:
+          PAYLOAD_CONTEXT: ${{ toJson(github.event.client_payload) }}
+        run: echo "$PAYLOAD_CONTEXT"
+
+      - name: Parse version from package.json
+        id: parse_version
+        run: |
+          VERSION=$(make current-version)
+          echo "::set-output name=version::$VERSION"
+
+      - name: Notify about triggers
+        uses: github-actions-up-and-running/pr-comment@v1.0.1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            You're creating a PR against a live release branch. The Version **${{ steps.parse_version.outputs.version }}** is going to be published.
+
+            Once you're happy with the release, type
+              - `/publish release`
+
+            I will **merge the PR myself** and start the release process.
