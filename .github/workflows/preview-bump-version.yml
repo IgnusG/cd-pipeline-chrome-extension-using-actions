@@ -69,12 +69,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Tag new released version
-        uses: tvdias/github-tagger@v0.0.2
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: v${{ steps.bump_version.outputs.version }}
-
       - name: Allow merge
         uses: actions-ecosystem/action-add-labels@v1.1.0
         with:
