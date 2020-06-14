@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Fail if publish command did not specify release as first argument
-        if: github.event.client_payload.slash_command.arg1 != 'preview'
+        if: github.event.client_payload.slash_command.arg1 != 'release'
         uses: cutenode/action-always-fail@v1.0.1
 
       - name: Fail if publish command does not target live-release
